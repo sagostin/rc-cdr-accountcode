@@ -18,6 +18,7 @@ includeLocalCalls = True
 includeOtherCalls = True
 deleteMessages = True
 periodicCheck = 60
+timeCheck = 2
 
 
 def process_account_code(code):
@@ -76,7 +77,7 @@ def process_csv_content(content):
         # Check if the call was made within the last 2 minutes
         if extension in last_account_code_by_extension:
             last_account_code, last_code_time = last_account_code_by_extension[extension]
-            if (current_time - last_code_time) <= datetime.timedelta(minutes=2):
+            if (current_time - last_code_time) <= datetime.timedelta(minutes=timeCheck):
                 # Append account code to valid calls if within last 2 minutes
                 processed_row = row + [last_account_code]
                 processed_calls.append(processed_row)
