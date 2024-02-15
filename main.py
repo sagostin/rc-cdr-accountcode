@@ -100,7 +100,8 @@ def handle_zip_attachment(part):
 
                     processed_calls.insert(0, header)
 
-                    file_name = file_path.replace("%DATETIME%", datetime.datetime.now().__str__())
+                    datetime_str = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
+                    file_name = file_path.replace("%DATETIME%", datetime_str)
 
                     with open(file_name, mode='w', newline='') as file:
                         writer = csv.writer(file)
