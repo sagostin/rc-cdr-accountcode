@@ -16,7 +16,7 @@ file_path = './output_file-%DATETIME%.csv'  # Replace with your actual file path
 
 includeLocalCalls = True
 includeOtherCalls = True
-deleteMessages = True
+deleteMessages = False
 periodicCheck = 60
 timeCheck = 2
 
@@ -48,9 +48,17 @@ def process_csv_content(content):
     # Use the current datetime for comparison
     current_time = datetime.datetime.now()
 
+    name_index = None  # Variable to store the index of the "Name" field
+
     # Reverse the order of rows to process from oldest to newest
     for row in reversed(csv_reader):
         if row[0].__contains__("Type"):  # Skip header
+            # Find and remove the "Name" field from the header
+            try:
+                name_index = row.index("Name")  # Adjust "Name" to the exact name of your field
+                del row[name_index]
+            except ValueError:
+                pass  # "Name" field not found in header
             csv_header = row
             csv_header[0] = "Type"
             csv_header = csv_header + ["AccountCode"]
@@ -58,6 +66,10 @@ def process_csv_content(content):
 
         if not row[1].startswith("Outgoing"):
             continue
+
+        if name_index is not None and len(row) > name_index:
+            # Remove the "given name" field from each row based on its index
+            del row[name_index]
 
         call_type, direction, from_number, to_number, extension, *rest = row
         date_str, time_str = row[7], row[8]  # Assuming date is not used for comparison here
