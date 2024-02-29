@@ -19,6 +19,7 @@ includeOtherCalls = True
 deleteMessages = False
 periodicCheck = 60
 timeCheck = 2
+mode = '1'
 
 
 def process_account_code(code):
@@ -157,9 +158,19 @@ def check_email_and_delete():
     mail.quit()  # Ensure proper logout and deletion of marked messages
 
 
-# Run the email check and deletion in a loop, every minute
-while True:
-    print("Checking for new messages...")
-    check_email_and_delete()
-    print("Waiting for next check...")
-    time.sleep(periodicCheck)
+def main():
+    if mode == '1':
+        while True:
+            print("Checking for new messages...")
+            check_email_and_delete()
+            print("Waiting for next check...")
+            time.sleep(periodicCheck)
+    elif mode == '2':
+        csv_file_path = input("Enter the path to the CSV file: ")
+        process_csv_content(csv_file_path)
+    else:
+        print("Invalid input. Exiting.")
+
+
+if __name__ == '__main__':
+    main()
