@@ -11,7 +11,7 @@ username = ''
 password = ''  # Be cautious with credentials
 port = 995  # Common port for POP3 over SSL
 
-local_npa_numbers = ['778', '250', '604']  # Example list
+local_npa_numbers = ['778', '331', '604']  # Example list
 file_path = './output_file-%DATETIME%.csv'  # Replace with your actual file path
 
 includeLocalCalls = True
@@ -19,7 +19,7 @@ includeOtherCalls = True
 deleteMessages = False
 periodicCheck = 60
 timeCheck = 2
-mode = '1'
+mode = '2'
 
 
 def process_account_code(code):
@@ -28,6 +28,8 @@ def process_account_code(code):
         return code[1:]  # Remove the leading '1' for 9-digit codes starting with '1'
     elif len(code) == 7:
         return '1' + code  # Prepend '1' to 7-digit codes
+    elif len(code) == 8 and code.startswith('0'):
+        return code
     return code
 
 
@@ -76,10 +78,13 @@ def process_csv_content(content):
             del row[name_index]
 
         call_type, direction, from_number, to_number, extension, *rest = row
-        date_str, time_str = row[7], row[8]  # Assuming date is not used for comparison here
-        call_datetime = datetime.datetime.strptime(time_str, "%I:%M %p")
-        # Replace the year, month, and day to match the current date for comparison
-        call_datetime = call_datetime.replace(year=current_time.year, month=current_time.month, day=current_time.day)
+        call_time = row[7] + " " + row[8]  # Assuming date is not used for comparison here
+
+        # Define the format
+        format_str = "%a %Y-%m-%d %I:%M %p"
+
+        # Convert to datetime
+        call_datetime = datetime.datetime.strptime(call_time, format_str)
 
         if len(to_number) <= 4:  # Skip extension to extension calls
             continue
@@ -93,10 +98,11 @@ def process_csv_content(content):
         # Check if the call was made within the last 2 minutes
         if extension in last_account_code_by_extension:
             last_account_code, last_code_time = last_account_code_by_extension[extension]
-            if (current_time - last_code_time) <= datetime.timedelta(minutes=timeCheck):
+            if (call_datetime - last_code_time) <= datetime.timedelta(minutes=timeCheck):
                 # Append account code to valid calls if within last 2 minutes
                 processed_row = row + [last_account_code]
                 processed_calls.append(processed_row)
+                del last_account_code_by_extension[extension]
 
     new_list = list(reversed(processed_calls))
 
@@ -176,6 +182,7 @@ def main():
         with open(csv_file_path, 'r', encoding='utf-8') as csv_file:
             content = csv_file.read()  # Read the content of the file into a string
             processed_calls, header = process_csv_content(content)  # Process the CSV content
+            print(processed_calls)
             write_to_file(processed_calls, header)
     else:
         print("Invalid input. Exiting.")
