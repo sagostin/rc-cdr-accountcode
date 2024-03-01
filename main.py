@@ -19,7 +19,9 @@ includeOtherCalls = True
 deleteMessages = False
 periodicCheck = 60
 timeCheck = 2
-mode = '2'
+
+# Mode 1 = use mail server, 2 = use user input to process csv
+mode = '1'
 
 
 def process_account_code(code):
