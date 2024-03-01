@@ -50,9 +50,6 @@ def process_csv_content(content):
     last_account_code_by_extension = {}  # Track the last account code used by each extension
     csv_header = []
 
-    # Use the current datetime for comparison
-    current_time = datetime.datetime.now()
-
     name_index = None  # Variable to store the index of the "Name" field
 
     # Reverse the order of rows to process from oldest to newest
