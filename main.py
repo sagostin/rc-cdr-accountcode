@@ -11,7 +11,7 @@ username = ''
 password = ''  # Be cautious with credentials
 port = 995  # Common port for POP3 over SSL
 
-local_npa_numbers = ['778', '331', '604']  # Example list
+local_npa_numbers = ['778', '250', '604']  # Example list
 file_path = './output_file-%DATETIME%.csv'  # Replace with your actual file path
 
 includeLocalCalls = True
