@@ -21,7 +21,7 @@ periodicCheck = 60
 timeCheck = 2
 
 # Mode 1 = use mail server, 2 = use user input to process csv
-mode = '1'
+mode = '2'
 
 
 def process_account_code(code):
@@ -59,11 +59,10 @@ def process_csv_content(content):
 
         if row[0].__contains__("Type"):  # Skip header
             # Find and remove the "Name" field from the header
-            try:
-                name_index = row.index("Name")  # Adjust "Name" to the exact name of your field
-                del row[name_index]
-            except ValueError:
-                pass  # "Name" field not found in header
+            # print(row.index("Name"))
+            # name_index = row.index("Name")  # Adjust "Name" to the exact name of your field
+            # del row[name_index]
+
             csv_header = row
             csv_header[0] = "Type"
             csv_header = csv_header + ["AccountCode"]
@@ -72,9 +71,10 @@ def process_csv_content(content):
         if not row[1].__contains__("Outgoing"):
             continue
 
-        if name_index is not None and len(row) > name_index:
-            # Remove the "given name" field from each row based on its index
-            del row[name_index]
+        # if name_index is not None:
+        # Remove the "given name" field from each row based on its index
+        # print("removing name index", name_index)
+        # del row[name_index]
 
         call_type, direction, from_number, to_number, extension, *rest = row
         call_time = row[7] + " " + row[8]  # Assuming date is not used for comparison here
