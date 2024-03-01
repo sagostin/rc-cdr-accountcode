@@ -53,6 +53,9 @@ def process_csv_content(content):
 
     # Reverse the order of rows to process from oldest to newest
     for row in reversed(csv_reader):
+        if row == "" or row == "\n":
+            continue
+
         if row[0].__contains__("Type"):  # Skip header
             # Find and remove the "Name" field from the header
             try:
@@ -65,7 +68,7 @@ def process_csv_content(content):
             csv_header = csv_header + ["AccountCode"]
             continue
 
-        if not row[1].startswith("Outgoing"):
+        if not row[1].__contains__("Outgoing"):
             continue
 
         if name_index is not None and len(row) > name_index:
@@ -111,17 +114,7 @@ def handle_zip_attachment(part):
                     content = csv_file.read().decode('utf-8')
                     processed_calls, header = process_csv_content(content)
 
-                    processed_calls.insert(0, header)
-
-                    datetime_str = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
-                    file_name = file_path.replace("%DATETIME%", datetime_str)
-
-                    with open(file_name, mode='w', newline='') as file:
-                        writer = csv.writer(file)
-                        writer.writerows(processed_calls)
-
-                    for call in processed_calls:
-                        print(call)
+                    write_to_file(processed_calls, header)
 
 
 def check_email_and_delete():
@@ -148,14 +141,27 @@ def check_email_and_delete():
                     handle_zip_attachment(part)
                 elif filename.endswith('.csv'):
                     content = part.get_payload(decode=True).decode('utf-8')
-                    processed_calls = process_csv_content(content)
-                    for call in processed_calls:
-                        print(call)
+                    processed_calls, header = process_csv_content(content)
+                    write_to_file(processed_calls, header)
         if deleteMessages:
             print("Deleted message...")
             mail.dele(i + 1)  # Mark the message for deletion
 
     mail.quit()  # Ensure proper logout and deletion of marked messages
+
+
+def write_to_file(processed_calls, header):
+    processed_calls.insert(0, header)
+
+    datetime_str = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
+    file_name = file_path.replace("%DATETIME%", datetime_str)
+
+    with open(file_name, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(processed_calls)
+
+    for call in processed_calls:
+        print(call)
 
 
 def main():
@@ -167,7 +173,10 @@ def main():
             time.sleep(periodicCheck)
     elif mode == '2':
         csv_file_path = input("Enter the path to the CSV file: ")
-        process_csv_content(csv_file_path)
+        with open(csv_file_path, 'r', encoding='utf-8') as csv_file:
+            content = csv_file.read()  # Read the content of the file into a string
+            processed_calls, header = process_csv_content(content)  # Process the CSV content
+            write_to_file(processed_calls, header)
     else:
         print("Invalid input. Exiting.")
 
